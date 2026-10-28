@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#051c2c">
+<title>NewMan · Gira con intención</title>
+<style>
+:root {
+  --navy: #051c2c;
+  --yellow: #ffda00;
+  --paper: #f5f3ed;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--navy);
+  font-family: Inter, Arial, sans-serif;
+}
+button, select, .upload { font: inherit; }
+button, .upload { cursor: pointer; }
+button { border: 0; }
+button:focus-visible, select:focus-visible {
+  outline: 3px solid #b08600;
+  outline-offset: 5px;
+}
+header {
+  height: 110px;
+  margin: 0 5%;
+  display: flex;
+  align-items: center;
+  gap: 38px;
+  border-bottom: 1px solid #051c2c30;
+}
+header > span { font-size: 10px; letter-spacing: 2px; }
+header button { margin-left: auto; }
+.text-button {
+  background: none;
+  color: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 12px 0;
+}
+main {
+  max-width: 1440px;
+  margin: auto;
+  padding: 45px 6% 30px;
+  display: grid;
+  grid-template-columns: .9fr 1.1fr;
+  gap: 10px 6%;
+}
+.intro { padding-top: 40px; }
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.7;
+}
+h1 {
+  font-size: clamp(52px, 6.5vw, 96px);
+  letter-spacing: -5px;
+  line-height: .98;
+  margin: 28px 0;
+  font-weight: 800;
+}
+h1 em { font-family: Georgia, serif; font-weight: 400; }
+.lead { font-family: Georgia, serif; font-size: 19px; line-height: 1.6; }
+.daily { margin-top: 50px; font-weight: bold; font-size: 15px; }
+#modeLabel { margin-top: 22px; font-size: 9px; opacity: .65; }
+.play { text-align: center; }
+.wheel-wrap {
+  position: relative;
+  max-width: 510px;
+  margin: 0 auto 24px;
+  padding: 12px;
+  border: 1px solid #051c2c30;
+  border-radius: 50%;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  border: 8px solid var(--navy);
+  box-shadow: 0 15px 35px #051c2c16;
+}
+.pointer {
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 42px;
+  background: var(--yellow);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  z-index: 2;
+}
+.hub {
+  position: absolute;
+  inset: 39%;
+  border-radius: 50%;
+  background: var(--yellow);
+  border: 6px solid var(--navy);
+  display: grid;
+  place-items: center;
+}
+.hub img { width: 76%; height: auto; }
+.primary {
+  background: var(--yellow);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 21px 28px;
+  min-width: 280px;
+}
+.primary:hover { background: #f1cb00; }
+.primary span { margin-left: 40px; font-size: 18px; }
+.primary:disabled { opacity: .5; cursor: wait; }
+.play > p { font-size: 11px; margin-top: 17px; }
+.prizes {
+  grid-column: 1 / -1;
+  border-top: 1px solid #051c2c30;
+  margin-top: 26px;
+  padding-top: 22px;
+}
+.prizes > .eyebrow { font-size: 9px; margin-bottom: 22px; }
+#prizeList {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.prize { font-size: 12px; }
+footer {
+  margin: 0 5%;
+  padding: 22px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #051c2c30;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+dialog {
+  color: var(--navy);
+  background: var(--paper);
+  border: 0;
+  padding: 42px;
+  max-width: min(560px, 94vw);
+  max-height: 90vh;
+}
+dialog::backdrop { background: #051c2cdd; backdrop-filter: blur(5px); }
+#winner {
+  text-align: center;
+  width: 520px;
+  border-top: 9px solid var(--yellow);
+}
+#winner .serif { font-family: Georgia, serif; font-size: 30px; margin-bottom: 8px; }
+#winner h2 { font-size: 46px; letter-spacing: -1px; margin: 16px 0 28px; }
+#winner small { display: block; margin: 24px 0; font-size: 10px; }
+#winner .primary { width: 100%; min-width: 0; }
+.dialog-top { display: flex; justify-content: space-between; align-items: center; }
+.dialog-top h2 { font-size: 23px; }
+.dialog-top button { background: none; font-size: 20px; }
+#admin p { line-height: 1.6; font-size: 13px; }
+#admin label { display: block; margin: 22px 0; font-size: 13px; }
+select {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  color: var(--navy);
+  background: white;
+  border: 1px solid #051c2c55;
+}
+.check { display: flex !important; gap: 12px; align-items: center; }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--navy); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.actions button, .upload { background: var(--navy); color: white; padding: 13px; font-size: 11px; }
+.actions .upload { margin: 0 !important; }
+.upload input { display: none; }
+.note { font-size: 11px !important; opacity: .7; }
+@media (max-width: 760px) {
+  header { height: 85px; gap: 12px; }
+  header > span { display: none; }
+  header button { font-size: 9px; }
+  main { padding: 25px 6%; grid-template-columns: 1fr; }
+  .intro { padding-top: 0; text-align: center; }
+  h1 { font-size: 62px; letter-spacing: -3px; margin: 14px 0; }
+  h1 br { display: none; }
+  h1 em { display: block; }
+  .lead { font-size: 16px; margin: 15px 0; }
+  .daily { margin: 15px 0; }
+  #modeLabel { margin: 12px 0 24px; }
+  .wheel-wrap { max-width: 440px; }
+  .prizes { margin-top: 12px; }
+  #prizeList { justify-content: center; gap: 12px 20px; }
+  footer { font-size: 8px; }
+  dialog { padding: 25px; }
+  #winner h2 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <img id="brandLogo" alt="NewMan" width="110" height="46">
+  <span>ELEGANCIA EN MOVIMIENTO</span>
+  <button id="manage" class="text-button">Control de activación ↗</button>
+</header>
+
+<main>
+  <section class="intro">
+    <p class="eyebrow">EL ESTILO TAMBIÉN ES SUERTE</p>
+    <h1>Gira con<br><em>intención.</em></h1>
+    <p class="lead">Un giro. Un detalle para ti.<br>Descubre tu próximo premio NewMan.</p>
+    <div class="daily"><span id="dayLabel">Jueves</span></div>
+    <p id="modeLabel" class="eyebrow">ACTIVACIÓN · JUEVES A DOMINGO</p>
+  </section>
+
+  <section class="play" aria-label="Ruleta de premios">
+    <div class="wheel-wrap">
+      <div class="pointer" aria-hidden="true"></div>
+      <canvas id="wheel" width="1000" height="1000" aria-label="Premios disponibles en la ruleta"></canvas>
+      <div class="hub"><img id="hubLogo" alt="" width="78"></div>
+    </div>
+    <button id="spin" class="primary">GIRAR LA RULETA <span>↗</span></button>
+    <p id="status" role="status">Tu próximo detalle está a un giro.</p>
+  </section>
+
+  <section class="prizes">
+    <p class="eyebrow">LOS DETALLES HACEN LA DIFERENCIA</p>
+    <div id="prizeList"></div>
+  </section>
+</main>
+
+<footer>
+  <span>FRENCH-BORN. ELEGANCIA NATURAL.</span>
+  <button class="text-button" id="fullscreen">Pantalla completa ⤢</button>
+</footer>
+
+<dialog id="winner">
+  <p class="eyebrow">UN DETALLE PARA TI</p>
+  <p class="serif">Has ganado</p>
+  <h2 id="won"></h2>
+  <p>Disfruta el camino. Disfruta tu premio.</p>
+  <small id="ticket"></small>
+  <button id="next" class="primary">SIGUIENTE PARTICIPANTE ↗</button>
+</dialog>
+
+<dialog id="admin">
+  <div class="dialog-top">
+    <h2>Control de activación</h2>
+    <button id="closeAdmin" aria-label="Cerrar">✕</button>
+  </div>
+  <p>Selecciona la jornada antes de comenzar. El stock se conserva en este navegador y equipo.</p>
+  <label>Jornada
+    <select id="day">
+      <option value="0">Jueves · 57 premios</option>
+      <option value="1">Viernes · 56 premios</option>
+      <option value="2">Sábado · 56 premios</option>
+      <option value="3">Domingo · 56 premios</option>
+    </select>
+  </label>
+  <label class="check">
+    <input type="checkbox" id="demo">
+    Modo de prueba (no descuenta premios reales)
+  </label>
+  <p id="summary"></p>
+  <div class="actions">
+    <button id="csv">Descargar registro CSV</button>
+    <button id="backup">Guardar respaldo</button>
+    <label class="upload">Restaurar respaldo
+      <input id="restore" type="file" accept="application/json">
+    </label>
+  </div>
+  <p class="note">Utiliza una sola pantalla. Otros equipos y navegadores tienen un stock independiente. Evita el modo incógnito y no borres los datos del navegador.</p>
+  <button id="reset" class="text-button">Reiniciar toda la activación…</button>
+</dialog>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+
+const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAAAuCAYAAADJAyyXAAAB+UlEQVR4nO2aXW7DIBCEMTK36BF6/5P0CL3FPrTyg6XKNQS8fwPZkSpFacADH7uQsCmFQqFQKLSmtgSi8vH5c76m76/t7n0JUaPvv//rkWf7PPKgloHr32h7CR+Wz7rrZ6Rvbns2uNrDOBNkCdLDX629ecTNCmBWaIf2pKzD6Kiplrj7yArQ1CNupcgrQNDMwM0OrzAnXRqaWqo8DNVOTdy0ab0ACiA01YirGZsp8gooNPVUiQiPjCZdE5rJHocEjxaBZvJ14NWe96SvpKSWHyRopqdKzQlH964xdjNw5wBmA0igfk1SZW/q7JHE3kidMCSgaYE3jbgZVrIkXM0xioMbMVv7rDdUEtjTtMewaV6CSrWX/OpA4JEeWlzTrD7LQwnC9ZVpqnxqvFV7ofELCwnWnVz7sILHOpxc60ueTLLULypS4tbLWHnPnrUm3jcFpTEGb28q4CQG1duH5ymwAMPbkaGd8rx8LcaHDpWI84CGoALoOSNAQ1rRBHR/yE6Vrya8Z1AcaNaTRoo1M2YRJxElM0HriTyE6MvI0LxFDY/e8Krg3h0aOrx9RmhkXIbOufg1izh0aF4iMO8ZNUoQRUBj2GeEVpwLauFPlYjQEEROdSb/wN2tIBRomhNBl75H62U8F+XthSLiZaJUeqIFM0AoFAqFQmkh/QKD5r/Z7jzV6AAAAABJRU5ErkJggg==";
+$("brandLogo").src = LOGO;
+$("hubLogo").src = LOGO;
+
+const DAYS = ["Jueves", "Viernes", "Sábado", "Domingo"];
+const PRIZES = [
+  "Corbata", "Calcetín", "Tripack calcetín",
+  "Pulsera", "Sombrero", "10% DCTO", "15% DCTO"
+];
+const STOCK = [
+  [3, 8, 8, 2, 5, 15, 16],
+  [3, 8, 8, 2, 5, 15, 15],
+  [2, 7, 7, 3, 5, 16, 16],
+  [2, 7, 7, 3, 5, 16, 16]
+];
+const KEY = "newman-activation-v1";
+const tau = 2 * Math.PI;
+const sum = row => row.reduce((a, b) => a + b, 0);
+
+const fresh = () => ({
+  version: 1,
+  day: 0,
+  stock: STOCK.map(row => [...row]),
+  history: [],
+  pending: null
+});
+
+function validate(s) {
+  if (
+    !s || s.version !== 1 ||
+    !Number.isInteger(s.day) || s.day < 0 || s.day > 3 ||
+    !Array.isArray(s.stock) || s.stock.length !== 4 ||
+    !Array.isArray(s.history)
+  ) throw Error("Respaldo no válido");
+
+  s.stock.forEach((row, day) => {
+    if (
+      !Array.isArray(row) || row.length !== 7 ||
+      row.some((n, i) =>
+        !Number.isInteger(n) || n < 0 || n > STOCK[day][i]
+      )
+    ) throw Error("Stock no válido");
+  });
+
+  const counts = STOCK.map(row => row.map(() => 0));
+  const ids = new Set();
+
+  for (const h of s.history) {
+    if (
+      !h ||
+      !Number.isInteger(h.day) || h.day < 0 || h.day > 3 ||
+      !Number.isInteger(h.prize) || h.prize < 0 || h.prize > 6 ||
+      typeof h.id !== "string" || ids.has(h.id) ||
+      !Number.isFinite(Date.parse(h.at))
+    ) throw Error("Registro no válido");
+
+    ids.add(h.id);
+    counts[h.day][h.prize]++;
+  }
+
+  if (counts.some((row, day) =>
+    row.some((n, i) => n !== STOCK[day][i] - s.stock[day][i])
+  )) throw Error("El registro no coincide con el stock");
+
+  if (s.pending && !s.history.some(h => h.id === s.pending)) {
+    throw Error("Resultado pendiente no válido");
+  }
+  return s;
+}
+
+function choose(row, random) {
+  const total = sum(row);
+  if (!total) throw Error("Jornada agotada");
+  if (random < 0 || random >= 1) throw Error("Azar no válido");
+  let point = random * total;
+  for (let i = 0; i < row.length; i++) {
+    point -= row[i];
+    if (point < 0) return i;
+  }
+  throw Error("Selección no válida");
+}
+
+let state;
+let trial = fresh();
+let demo = false;
+let busy = false;
+let failed = false;
+let angle = 0;
+
+function load() {
+  const raw = localStorage.getItem(KEY);
+  return raw ? validate(JSON.parse(raw)) : fresh();
+}
+function current() {
+  return demo ? trial : state;
+}
+function persist(next) {
+  validate(next);
+  if (demo) {
+    trial = next;
+    return;
+  }
+  localStorage.setItem(KEY, JSON.stringify(next));
+  state = next;
+}
+function failure(e) {
+  failed = true;
+  $("spin").disabled = true;
+  $("status").textContent =
+    "No se pudo guardar el stock. Abre Control de activación y descarga un respaldo antes de continuar.";
+  console.error(e);
+}
+
+try {
+  state = load();
+  localStorage.setItem(KEY, JSON.stringify(state));
+} catch (e) {
+  state = fresh();
+  failure(e);
+}
+
+function render() {
+  const s = current();
+  const row = s.stock[s.day];
+
+  $("dayLabel").textContent = DAYS[s.day];
+  $("modeLabel").textContent = demo
+    ? "MODO DE PRUEBA · NO DESCUENTA STOCK REAL"
+    : "ACTIVACIÓN · JUEVES A DOMINGO";
+
+  $("day").value = s.day;
+  $("demo").checked = demo;
+  $("spin").disabled = failed || busy || !!s.pending || !sum(row);
+
+  if (!failed) {
+    $("status").textContent = !sum(row)
+      ? "Todos los premios de esta jornada fueron entregados."
+      : demo
+        ? "Modo de prueba: puedes girar sin consumir premios reales."
+        : s.pending
+          ? "Hay un premio pendiente de entregar."
+          : "Tu próximo detalle está a un giro.";
+  }
+
+  $("prizeList").replaceChildren(
+    ...row.flatMap((n, i) => {
+      if (!n) return [];
+      const el = document.createElement("div");
+      el.className = "prize";
+      el.textContent = PRIZES[i];
+      return [el];
+    })
+  );
+
+  $("summary").textContent = DAYS.map(
+    (day, i) => `${day}: ${sum(s.stock[i])} restantes`
+  ).join(" · ");
+
+  draw(row, angle);
+}
+
+function draw(row, rotation) {
+  const c = $("wheel").getContext("2d");
+  const active = row.map((n, i) => n ? i : -1).filter(i => i >= 0);
+  const colors = [
+    "#051c2c", "#ffda00", "#e7e3d9",
+    "#274656", "#ffda00", "#f5f3ed", "#436170"
+  ];
+
+  c.clearRect(0, 0, 1000, 1000);
+  c.save();
+  c.translate(500, 500);
+  c.rotate(rotation);
+
+  if (!active.length) {
+    c.fillStyle = "#051c2c";
+    c.beginPath();
+    c.arc(0, 0, 500, 0, tau);
+    c.fill();
+  }
+
+  active.forEach((prize, j) => {
+    const start = j * tau / active.length;
+    const end = (j + 1) * tau / active.length;
+    const mid = (start + end) / 2;
+
+    c.beginPath();
+    c.moveTo(0, 0);
+    c.arc(0, 0, 500, start, end);
+    c.closePath();
+    c.fillStyle = colors[prize];
+    c.fill();
+    c.strokeStyle = "#f5f3ed88";
+    c.lineWidth = 2;
+    c.stroke();
+
+    c.save();
+    c.rotate(mid);
+    c.fillStyle = [0, 3, 6].includes(prize) ? "#f5f3ed" : "#051c2c";
+    c.textAlign = "right";
+    c.textBaseline = "middle";
+    c.font = "bold 25px Arial";
+    c.fillText(PRIZES[prize].toUpperCase(), 440, 0);
+    c.restore();
+  });
+
+  c.restore();
+}
+
+function showPending() {
+  const s = current();
+  if (!s.pending) return;
+  const h = s.history.find(h => h.id === s.pending);
+
+  $("won").textContent = PRIZES[h.prize];
+  $("ticket").textContent =
+    `${demo ? "PRUEBA · " : ""}${DAYS[h.day]} · Premio ${h.id.slice(0, 8).toUpperCase()}`;
+
+  if (!$("winner").open) $("winner").showModal();
+}
+
+async function locked(fn) {
+  if (navigator.locks) return navigator.locks.request(KEY, fn);
+  throw Error(
+    "Este navegador no permite proteger los giros. Abre la ruleta en Chrome o Edge actualizado desde su dirección web."
+  );
+}
+
+$("spin").onclick = async () => {
+  if (busy || failed) return;
+  busy = true;
+  $("spin").disabled = true;
+
+  let h;
+  let oldRow;
+
+  try {
+    await locked(() => {
+      if (!demo) state = load();
+
+      const s = structuredClone(current());
+      if (s.pending) {
+        throw Error("Hay un premio pendiente. Recarga para verlo.");
+      }
+
+      oldRow = [...s.stock[s.day]];
+      const rnd = new Uint32Array(1);
+      crypto.getRandomValues(rnd);
+
+      const prize = choose(oldRow, rnd[0] / 4294967296);
+      h = {
+        id: crypto.randomUUID(),
+        at: new Date().toISOString(),
+        day: s.day,
+        prize
+      };
+
+      s.stock[s.day][prize]--;
+      s.history.push(h);
+      s.pending = h.id;
+      persist(s);
+    });
+
+    $("status").textContent = "La suerte está en movimiento…";
+
+    const active = oldRow.map((n, i) => n ? i : -1).filter(i => i >= 0);
+    const index = active.indexOf(h.prize);
+    const mid = (index + .5) * tau / active.length;
+    const target = 5 * tau + (((-Math.PI / 2 - mid) % tau + tau) % tau);
+    const duration = matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 100 : 4800;
+    const start = performance.now();
+
+    await new Promise(resolve => {
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        angle = target * (1 - Math.pow(1 - t, 4));
+        draw(oldRow, angle);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+
+    showPending();
+  } catch (e) {
+    $("status").textContent = e.message;
+    if (h) showPending();
+  } finally {
+    busy = false;
+    if (!current().pending) render();
+  }
+};
+
+$("next").onclick = async () => {
+  try {
+    await locked(() => {
+      if (!demo) state = load();
+      const s = structuredClone(current());
+      s.pending = null;
+      persist(s);
+    });
+    $("winner").close();
+    angle = 0;
+    render();
+  } catch (e) {
+    failure(e);
+  }
+};
+
+$("winner").addEventListener("cancel", e => e.preventDefault());
+
+$("manage").onclick = () => {
+  if (busy || current().pending) return;
+  render();
+  $("admin").showModal();
+};
+
+$("closeAdmin").onclick = () => $("admin").close();
+
+$("day").onchange = async () => {
+  const day = Number($("day").value);
+  try {
+    await locked(() => {
+      if (!demo) state = load();
+      const s = structuredClone(current());
+      if (s.pending) {
+        throw Error("Entrega el premio pendiente antes de cambiar de jornada.");
+      }
+      s.day = day;
+      persist(s);
+    });
+    angle = 0;
+    render();
+  } catch (e) {
+    alert(e.message);
+    render();
+  }
+};
+
+$("demo").onchange = () => {
+  demo = $("demo").checked;
+  angle = 0;
+  render();
+  if (current().pending) {
+    $("admin").close();
+    showPending();
+  }
+};
+
+function download(name, content, type) {
+  const url = URL.createObjectURL(new Blob([content], {type}));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+$("csv").onclick = () => {
+  const rows = [
+    ["ID", "Fecha UTC", "Jornada", "Premio"],
+    ...current().history.map(h => [
+      h.id, h.at, DAYS[h.day], PRIZES[h.prize]
+    ])
+  ];
+  const csv = "\ufeff" + rows.map(row =>
+    row.map(v => '"' + String(v).replaceAll('"', '""') + '"').join(";")
+  ).join("\r\n");
+
+  download(
+    `${demo ? "prueba" : "newman"}-premios.csv`,
+    csv,
+    "text/csv;charset=utf-8"
+  );
+};
+
+$("backup").onclick = () => download(
+  `${demo ? "prueba" : "newman"}-respaldo-${new Date().toISOString().slice(0, 10)}.json`,
+  JSON.stringify(current(), null, 2),
+  "application/json"
+);
+
+$("restore").onchange = async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const next = validate(JSON.parse(await file.text()));
+    if (!confirm(
+      `Este respaldo reemplazará el stock y registro ${demo ? "de prueba" : "REAL"} de las cuatro jornadas. ¿Restaurar?`
+    )) return;
+
+    await locked(() => persist(next));
+    angle = 0;
+    render();
+
+    if (next.pending) {
+      $("admin").close();
+      showPending();
+    }
+  } catch (e) {
+    alert("No se pudo restaurar: " + e.message);
+  } finally {
+    e.target.value = "";
+  }
+};
+
+$("reset").onclick = async () => {
+  if (prompt(
+    `Se borrará todo el registro ${demo ? "de prueba" : "REAL"} y se repondrán los 225 premios. Para confirmar escribe REINICIAR.`
+  ) !== "REINICIAR") return;
+
+  try {
+    await locked(() => persist(fresh()));
+    failed = false;
+    angle = 0;
+    render();
+  } catch (e) {
+    failure(e);
+  }
+};
+
+$("fullscreen").onclick = async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (e) {
+    alert("El navegador no permite pantalla completa. Puedes ampliarla desde su menú.");
+  }
+};
+
+window.addEventListener("storage", e => {
+  if (e.key !== KEY || demo) return;
+  try {
+    state = load();
+    if (!busy) {
+      angle = 0;
+      render();
+      if (state.pending) showPending();
+      else if ($("winner").open) $("winner").close();
+    }
+  } catch (e) {
+    failure(e);
+  }
+});
+
+render();
+if (!failed) showPending();
+</script>
+</body>
+</html>
